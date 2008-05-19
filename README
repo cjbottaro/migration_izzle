@@ -1,0 +1,52 @@
+RMigrations (Retroactive Migrations)
+===========
+
+= Summary
+Extended functionality of Rail's default migrations.  Key Features are...
+ * retroactively run migrations with version numbers less than or equal to the current database version
+ * forcing migrations to run (even if they have already been run)
+ 
+= Author
+Christopher J. Bottaro
+
+= Motivation
+If you've ever worked on a Rails project with more than 1 person sharing a single database, I'm sure you have run into this situation:
+Developer A runs:
+ script/generate migration dev_a -> 009_dev_a.rb
+Before he commits his work, Developer B runs:
+ script/generate migration dev_b -> 009_dev_b.rb
+Now Developer A runs:
+ rake db:migrate -> runs 009_dev_a.rb and sets db version to 009
+Then Developer B runs:
+ rake db:migrate -> does nothing because we're already on version 009
+
+= Solution
+This plugin adds a "history" table that keeps track of which migrations have been run and which have not.  Migrations with lower (or equal) versions than the current db version will be retroactively run.  Conversely, if migrating to a previous db version, migrations that have not previously been run (i.e. do not have an entry in the history table) will not be run.
+
+= Extras
+This plugin also allows one to "force" a migration to be run.  Let's say that 005_print_hello.rb has already been run and has an entry in the history table.  You can force it to be run again with
+ rake db:migrate:force up=005_print_hello.rb
+You can also force the migration to be run in the other direction:
+ rake db:migrate:force down=005_print_hello.rb
+Forcing migrations to run will never mess up the integrity of the history table.  After forcing up, you are guaranteed that there is one and only one entry for that migration in the history table.  After forcing down, you are guaranteed that no entry in the history table for that migration.
+
+= Installation
+ script/plugin install http://stochasticbytes.com/svn/r_migrations
+or
+ cd RAILS_ROOT
+ svn co http://stochasticbytes.com/svn/r_migrations vendor/plugins/r_migrations
+ ruby vendor/plugins/r_migrations/install.rb
+After installation, you can confirm that the history table was properly initialized by typing
+ rake db:migrate:history:list
+
+= Rake Tasks
+This plugin defines a handful of Rake tasks to examine and manage the history table.
+
+List what migrations have been recorded in the history table.
+ rake db:migrate:history:list
+
+Clear the history table.  Useful if you want to run all your migrations again starting from version 0.
+ rake db:migrate:history:clear
+
+Initialize the history table with all the migrations defined in db/migrate up to the current database version.  This is useful when adding this plugin to an existing project.  This task can be run multiple times without hurting anything.  This task is run automatically by the install script.
+ rake db:migrate:history:init

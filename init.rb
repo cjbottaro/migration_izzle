@@ -1,0 +1,1 @@
+require 'r_migrations'
