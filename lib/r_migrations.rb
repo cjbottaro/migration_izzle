@@ -90,9 +90,9 @@ module ActiveRecord
       migrations = migration_files.inject([]) do |migrations, migration_file|
         load(migration_file)
         version, name = migration_version_and_name(migration_file)
-        already_ran_key = version.to_i.to_s + migration_class(name, version.to_i).name
-        migrations << [ version.to_i, migration_class(name, version.to_i) ] if (up? and !already_ran.has_key?(already_ran_key)) or \
-                                                                               (down? and already_ran.has_key?(already_ran_key))
+        already_ran_key = version.to_i.to_s + migration_class(name).name
+        migrations << [ version.to_i, migration_class(name) ] if (up? and !already_ran.has_key?(already_ran_key)) or \
+                                                                 (down? and already_ran.has_key?(already_ran_key))
         migrations
       end
       down? ? migrations.sort_by{|e| [e[0], e[1].name]}.reverse : migrations.sort_by{|e| [e[0], e[1].name]}
