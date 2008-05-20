@@ -72,8 +72,8 @@ module ActiveRecord
       migration_file = @migrations_path + file_name
       load(migration_file)
       version, name = migration_version_and_name(migration_file)
-      migration_class(name, version.to_i).migrate(@direction)
-      migration_class_name = migration_class(name, version.to_i).name
+      migration_class(name).migrate(@direction)
+      migration_class_name = migration_class(name).name
       if @direction == :up and !schema_history_exists(version, migration_class_name)
         update_schema_history(version, migration_class_name)
       elsif @direction == :down and schema_history_exists(version, migration_class_name)
