@@ -1,1 +1,1 @@
-require 'r_migrations'
+require 'migration_izzle'
